@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://docs.corebrain.ai/</loc>
+        <lastmod>2025-03-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.corebrain.ai/"/>
+    </url>
+    <url>
+        <loc>https://docs.corebrain.ai/api-reference/analytics/</loc>
+        <lastmod>2025-03-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.corebrain.ai/api-reference/analytics/"/>
+    </url>
+    <url>
+        <loc>https://docs.corebrain.ai/api-reference/authentication/</loc>
+        <lastmod>2025-03-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.corebrain.ai/api-reference/authentication/"/>
+    </url>
+    <url>
+        <loc>https://docs.corebrain.ai/api-reference/conversations/</loc>
+        <lastmod>2025-03-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.corebrain.ai/api-reference/conversations/"/>
+    </url>
+    <url>
+        <loc>https://docs.corebrain.ai/api-reference/database/</loc>
+        <lastmod>2025-03-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.corebrain.ai/api-reference/database/"/>
+    </url>
+    <url>
+        <loc>https://docs.corebrain.ai/architecture/components/</loc>
+        <lastmod>2025-03-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.corebrain.ai/architecture/components/"/>
+    </url>
+    <url>
+        <loc>https://docs.corebrain.ai/architecture/data-flow/</loc>
+        <lastmod>2025-03-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.corebrain.ai/architecture/data-flow/"/>
+    </url>
+    <url>
+        <loc>https://docs.corebrain.ai/architecture/overview/</loc>
+        <lastmod>2025-03-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.corebrain.ai/architecture/overview/"/>
+    </url>
+</urlset>

@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: corebrain-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    command: >
+      sh -c "uvicorn main:app --host 0.0.0.0 --port ${PORT} --reload"
+
+  mongodb:
+    image: mongo:5.0
+    container_name: corebrain-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: corebrain-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+networks:
+  corebrain-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local

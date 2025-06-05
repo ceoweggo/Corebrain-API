@@ -1,0 +1,12 @@
+{% macro render_language_selector(languages, current_language) %}
+<div class="md-language">
+    <label for="language-select">Language:</label>
+    <select id="language-select" onchange="window.location.href=this.value;">
+        {% for lang in languages %}
+            <option value="{{ lang.site_url }}/docs/" {% if lang.locale == current_language %}selected{% endif %}>
+                {{ lang.name }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+{% endmacro %}

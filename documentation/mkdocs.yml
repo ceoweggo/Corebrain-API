@@ -1,0 +1,191 @@
+site_name: CoreBrain API Documentation
+site_url: https://docs.corebrain.ai
+site_description: Documentación oficial de CoreBrain API
+site_author: Globodain Technology Corporation
+
+# Repository
+repo_name: corebrain/api
+repo_url: https://github.com/Globodain/Corebrain.git
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: Copyright &copy; 2025 CoreBrain AI
+
+theme:
+  name: 'material'
+  language: es
+  custom_dir: 'overrides'
+  palette:
+    # Paleta de esquema claro (día)
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Cambiar a modo oscuro
+    # Paleta de esquema oscuro (noche)
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar a modo claro
+  icon:
+    logo: material/brain
+    repo: fontawesome/brands/github
+  features:
+    - announce
+    - header.autohide
+    - navigation.tabs
+    #- navigation.expand
+    - navigation.instant # Reduce lapsus time
+    - navigation.instant.progress # Improve search experience
+    - content.footnote.tooltips
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+  announce:
+    message: "Softcamp Application will be officially launched on November 1, 2024 and will start its commercialization."
+    type: "info"  # "info", "warning", "error"
+
+# Plugins
+plugins:
+  - minify:
+      minify_html: true
+  - search:
+      lang: ['en', 'es']
+      separator: '[\s\-]+'
+      prebuild_index: true
+  - i18n:
+      default_language: 'es'
+      languages:
+        - locale: 'es'
+          name: 'Español'
+          default: true
+          build: true
+  - render_swagger:
+      swagger_path: openapi.json
+
+# Extensiones de Markdown
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.smartsymbols
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - toc:
+      permalink: true
+
+
+# Estructura de navegación
+nav:
+  - Inicio: index.md
+  - Guía de Inicio:
+    - Introducción: getting-started/introduction.md
+    - Instalación: getting-started/installation.md
+    - Configuración: getting-started/configuration.md
+    - Primeros pasos: getting-started/first-steps.md
+  - Arquitectura:
+    - Visión general: architecture/overview.md
+    - Componentes: architecture/components.md
+    - Flujo de datos: architecture/data-flow.md
+  - API Reference:
+    - Autenticación: api-reference/authentication.md
+    - Conversaciones: api-reference/conversations.md
+    - Mensajes: api-reference/messages.md
+    - Base de datos: api-reference/database.md
+    - Analíticas: api-reference/analytics.md
+  - SDK:
+    - Introducción: sdk/introduction.md
+    - Instalación: sdk/installation.md
+    - Autenticación: sdk/authentication.md
+    - Uso básico: sdk/basic-usage.md
+    - Ejemplos: sdk/examples.md
+  - Integración:
+    - Opciones de integración: integration/options.md
+    - JavaScript: integration/javascript.md
+    - Python: integration/python.md
+    - Node.js: integration/nodejs.md
+    - Otros lenguajes: integration/other-languages.md
+  - Seguridad:
+    - Mejores prácticas: security/best-practices.md
+    - API Keys: security/api-keys.md
+    - Permisos: security/permissions.md
+  - Despliegue:
+    - Requisitos: deployment/requirements.md
+    - Docker: deployment/docker.md
+    - Kubernetes: deployment/kubernetes.md
+    - Configuración avanzada: deployment/advanced-config.md
+  - Contribuir:
+    - Guía de contribución: contributing/guide.md
+    - Código de conducta: contributing/code-of-conduct.md
+    - Desarrollo local: contributing/local-development.md
+  - FAQ: faq.md
+
+# Opciones extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/corebrain
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/corebrain
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/company/corebrain
+  consent:
+    title: Cookie consent
+    description: >- 
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+  navigation:
+    collapse: false
+
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.details
+  - pymdownx.critic
+  - pymdownx.snippets:
+      base_path: 
+        - docs
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - footnotes
+  - tables
+
+# Google Analytics (opcional)
+# extra:
+#   analytics:
+#     provider: google
+#     property: G-XXXXXXXXXX
+
