@@ -586,7 +586,7 @@ class AIQuery:
             except Exception as e:
                 logger.warning(f"Error preparing collection information: {str(e)}")
         
-        # Crear system prompt para consulta MongoDB
+        # Create system prompt for MongoDB query
         system_prompt = f"""
        You are an assistant specialized in translating natural language queries into MongoDB operations.
 
@@ -595,6 +595,8 @@ class AIQuery:
 
         {collection_info}
 
+        IMPORTANT: If the user requests a field that is within an object (for example, 'customer.name'), you must use the dot notation in the filter, for example: {{"customer.name": "John"}} to search for documents where the 'customer' object has 'name' equal to 'John'.
+        IMPORTANT: If the user requests a field that is within an array of objects (for example, 'items.name'), you must use the dot notation in the filter, for example: {{"items.name": "notepad"}} to search for documents where any object in the 'items' array has 'name' equal to 'notepad'.
         Your task is:  
         1. Carefully analyze the user's query
         2. Use the '{selected_collection}' collection for this query
@@ -622,10 +624,9 @@ class AIQuery:
         }}
 
         IMPORTANT: Use the exact "{selected_collection}" collection in your response.
-
         Respond ONLY with the JSON object, without any other text.
         """
-        
+        print(system_prompt)
         try:
             # Initialize OpenAI client
             client = openai.AsyncOpenAI(api_key=settings.OPENAI.OPENAI_API_KEY)
@@ -948,7 +949,7 @@ class AIQuery:
         if join_matches:
             join_tables.extend(join_matches)
         
-        # Detectar tipo de consulta SQL
+        # Detect SQL query type
         query_type = "consulta"
         if "count" in sql_lower and "group by" not in sql_lower:
             query_type = "conteo"
@@ -961,7 +962,7 @@ class AIQuery:
         elif "where" in sql_lower:
             query_type = "filtrado"
         
-        # Crear resumen básico para incluir en el contexto
+        # Create a basic summary to include in the context
         summary = {
             "query_type": query_type,
             "total_results": result.count,
@@ -974,7 +975,7 @@ class AIQuery:
             "has_joins": len(join_tables) > 0
         }
         
-        # Preparar contexto para OpenAI
+        # Preparing context for OpenAI
         context = {
             "original_query": query,
             "sql_query": sql_query,
@@ -989,7 +990,7 @@ class AIQuery:
         try:
             query_language = detect(query)
         except:
-            query_language = "es"  # Valor predeterminado si no se puede detectar
+            query_language = "es"  # Default value if cannot be detected
 
         query_language = detect(query)
         print("Lenguaje identificado: ", query_language)
@@ -1008,7 +1009,7 @@ class AIQuery:
 
         language_name = LANGUAGE_MAPPING.get(query_language, "English")
         
-        # Generar prompt para OpenAI
+        # Generate prompt for OpenAI
         system_prompt = f"""
             You are a specialized assistant for explaining SQL query results.
             YOUR ENTIRE RESPONSE MUST BE IN {language_name} ONLY.
@@ -1038,47 +1039,47 @@ class AIQuery:
         """
         
         try:
-            # Inicializar cliente OpenAI
+            # Initialize OpenAI client
             client = openai.AsyncOpenAI(api_key=settings.OPENAI.OPENAI_API_KEY)
             
-            # Enviar solicitud a OpenAI
+            # Submit application to OpenAI
             response = await client.chat.completions.create(
                 model=settings.OPENAI.OPENAI_MODEL,
                 max_tokens=settings.OPENAI.MAX_TOKENS,
-                temperature=0.7,  # Un poco más de creatividad para la explicación
+                temperature=0.7,  # A little more creativity for the explanation
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Explica los resultados de esta consulta SQL en {context['detected_language']}:\n{context_json}"}
                 ]
             )
             
-            # Extraer explicación
+            # Extract explanation
             explanation = response.choices[0].message.content
             
             return explanation
         
         except Exception as e:
-            # En caso de error, generar explicación básica
-            logger.error(f"Error al generar explicación SQL: {str(e)}")
+            # In case of error, generate basic explanation
+            logger.error(f"Error generating SQL explanation: {str(e)}")
             
-            # Crear una explicación sencilla basada en los datos disponibles
+            # Create a simple explanation based on the available data
             if result.count == 0:
-                return "No se encontraron registros que coincidan con tu consulta."
+                return "No records were found matching your query."
             else:
-                explanation = f"Se encontraron {result.count} registros en la base de datos."
+                explanation = f"{result.count} records were found in the database."
                 
-                # Añadir información básica sobre las columnas si están disponibles
+                # Add basic information about columns if available
                 if column_names:
-                    explanation += f" Los campos presentes en los resultados son: {', '.join(column_names)}."
+                    explanation += f" The fields present in the results are: {', '.join(column_names)}."
                 
-                # Añadir información sobre las tablas involucradas
+                # Add information about the tables involved
                 if selected_tables or join_tables:
                     tables = list(set(selected_tables + join_tables))
-                    explanation += f" La consulta se realizó sobre {', '.join(tables)}."
+                    explanation += f" The query was performed on {', '.join(tables)}."
                 
-                # Añadir información sobre el tiempo de ejecución
+                # Add runtime information
                 if result.query_time_ms > 0:
-                    explanation += f" La consulta se ejecutó en {result.query_time_ms:.1f} ms."
+                    explanation += f" The query was executed in {result.query_time_ms:.1f} ms."
                     
                 return explanation
          
@@ -1091,32 +1092,34 @@ class AIQuery:
         db_connection = None
     ) -> Dict[str, Any]:
         """
-        Procesa una consulta en lenguaje natural y genera una explicación.
-        
+        Processes a natural language query and generates an explanation.
+
         Args:
-            query: Consulta en lenguaje natural
-            db_schema: Esquema de la base de datos
-            collection_name: Nombre de la colección/tabla a consultar (opcional)
-            config_id: ID de configuración (opcional)
-            
+            query: Natural language query
+            db_schema: Database schema
+            collection_name: Name of the collection/table to query (optional)
+            config_id: Configuration ID (optional)
+
         Returns:
-            Diccionario con la consulta generada, resultados y explicación
+            Dictionary with the generated query, results, and explanation
+
+
         """
         try:
-            # Determinar el tipo de base de datos
+            # Determine the database type
             db_type = db_schema.get("type", "").lower()
             
             if db_type == "sql":
-                # Para bases de datos SQL
+                # For SQL databases
                 engine = db_schema.get("engine", "sqlite").lower()
                 
-                # Generar consulta SQL
+                # Generate SQL query
                 sql_query = await AIQuery.generate_sql_query(query, db_schema, engine)
                 
-                # Ejecutar consulta SQL
+                # Execute SQL query
                 result_data, execution_time = await AIQuery.execute_sql_query(sql_query, db_schema)
                 
-                # Crear objeto QueryResult
+                # Create QueryResult object
                 result = QueryResult(
                     data=result_data,
                     count=len(result_data),
@@ -1128,10 +1131,10 @@ class AIQuery:
                     }
                 )
                 
-                # Generar explicación
+                # Generate explanation
                 explanation = await AIQuery.generate_sql_result_explanation(query, sql_query, result)
                 
-                # Devolver respuesta completa
+                # Return full response
                 return {
                     "explanation": explanation,
                     "query": {
@@ -1142,33 +1145,33 @@ class AIQuery:
                 }
                 
             elif db_type in ["nosql", "mongodb"]:
-                # Para MongoDB
+                # For MongoDB
                 
                 if db_connection:
                     debug_info = await Diagnostic.debug_mongodb_connection(db_connection)
-                    logger.info(f"Diagnóstico MongoDB previo a consulta: {json.dumps(debug_info, default=str)}")
+                    logger.info(f"MongoDB Diagnostics before query: {json.dumps(debug_info, default=str)}")
                     
                     if debug_info.get("connection_status") != "connected":
                         return {
-                            "explanation": "No se pudo conectar a la base de datos MongoDB",
+                            "explanation": "Could not connect to the MongoDB database",
                             "query": None,
                             "result": None,
                             "error": True,
                             "debug_info": debug_info
                         }
                 
-                # Generar consulta MongoDB
+                # Generate MongoDB query
                 mongo_query = await AIQuery.generate_mongodb_query(
                     query, db_schema, collection_name, db_connection
                 )
                 
-                # Ejecutar la consulta MongoDB
-                # Implementación de ejecución de consulta MongoDB...
-                # (Suponiendo que existe un método para ejecutar la consulta)
-                
-                # Placeholder para resultados
+                # Execute the MongoDB query
+                # ​​Implementing MongoDB query execution...
+                # (Assuming a method exists to execute the query)
+                    
+                # Placeholder for results
                 result = QueryResult(
-                    data=[],  # Aquí irían los datos reales
+                    data=[],  # The real data would go here
                     count=0,
                     query_time_ms=0,
                     metadata={
@@ -1176,14 +1179,14 @@ class AIQuery:
                     }
                 )
                 
-                # Preparar el objeto de consulta para devolverlo
-                # Convertir MongoDBQuery a dict de forma segura
+                # Prepare the query object for return
+                # Safely convert MongoDBQuery to dict
                 if hasattr(mongo_query, "model_dump"):
                     query_dict = mongo_query.model_dump()
                 elif hasattr(mongo_query, "dict"):
                     query_dict = mongo_query.dict()
                 else:
-                    # Fallback: crear diccionario manualmente
+                    # Fallback: Create dictionary manually
                     query_dict = {
                         "collection": getattr(mongo_query, "collection", ""),
                         "operation": getattr(mongo_query, "operation", "find"),
@@ -1195,10 +1198,10 @@ class AIQuery:
                         "skip": getattr(mongo_query, "skip", 0)
                     }
                 
-                # Generar explicación
+                # Generate explanation
                 explanation = await AIQuery.generate_result_explanation(query, mongo_query, result)
                 
-                # Devolver respuesta completa
+                # Return full response
                 return {
                     "explanation": explanation,
                     "query": query_dict,
@@ -1206,21 +1209,21 @@ class AIQuery:
                 }
             
             else:
-                # Tipo de base de datos no soportado
+                # Unsupported database type
                 return {
-                    "explanation": f"Tipo de base de datos no soportado: {db_type}",
+                    "explanation": f"Unsupported database type: {db_type}",
                     "query": None,
                     "result": None,
                     "error": True
                 }
                 
         except Exception as e:
-            logger.error(f"Error al procesar consulta en lenguaje natural: {str(e)}")
+            logger.error(f"Error processing natural language query: {str(e)}")
             import traceback
             logger.error(traceback.format_exc())
             
             return {
-                "explanation": f"Error al procesar la consulta: {str(e)}",
+                "explanation": f"Error processing query: {str(e)}",
                 "query": None,
                 "result": None,
                 "error": True
@@ -1232,58 +1235,58 @@ class AIQuery:
         db_schema: Dict[str, Any]
     ) -> List[str]:
         """
-        Procesa una consulta en lenguaje natural y genera una explicación.
-        
+        Processes a natural language query and generates an explanation.
+
         Args:
-            question: Consulta en lenguaje natural
-            db_schema: Esquema de la base de datos
-            
+            question: Natural language query
+            db_schema: Database schema
+
         Returns:
-            Diccionario con la consulta generada, resultados y explicación sobre los datos
-            Determina qué colección se debe consultar	
+            Dictionary with the generated query, results, and explanation of the data
+            Determines which collection to query
         """
 
-        # Crear system prompt para consulta MongoDB
+        # Create system prompt for MongoDB query
         system_prompt = f"""
-        Eres un asistente especializado en identificar las colecciones necesarias y relativas a la consulta del usuario.
-        
-        ESTRUCTURA DE LA BASE DE DATOS:
+        You are an assistant specialized in identifying the necessary collections related to the user's query.
+
+        DATABASE STRUCTURE:
         {db_schema}
-    
-        Tu tarea es:
-        1. Analizar cuidadosamente la consulta del usuario
-        2. Entender el esquema de la base de datos
-        3. Determinar cual o cuales son las colecciones que se deben consultar
-        
-        Responde ÚNICAMENTE con las colecciones que se deben consultar en formato de lista, separadas por comas.
+
+        Your task is to:
+        1. Carefully analyze the user's query
+        2. Understand the database schema
+        3. Determine which collection(s) should be queried
+
+        Respond ONLY with the collections to be queried in a list format, separated by commas.
         """
         
         try:
-            # Inicializar cliente de OpenAI
+            # Initialize OpenAI client
             client = openai.AsyncOpenAI(api_key=settings.OPENAI.OPENAI_API_KEY)
 
-            # Enviar solicitud a OpenAI
+            # Submit application to OpenAI
             response = await client.chat.completions.create(
                 model=settings.OPENAI.OPENAI_MODEL,
                 max_tokens=settings.OPENAI.MAX_TOKENS,
-                temperature=0.2,  # Temperatura baja para respuestas más deterministas
+                temperature=0.2,  # Low temperature for more deterministic responses
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": question}
                 ]
             )
             
-            # Extraer y procesar respuesta JSON
+            # Extract and process JSON response
             ai_response = response.choices[0].message.content
             json_text = AIQuery.clean_json_response(ai_response)
             
-            # Parsear JSON
+            # Analise JSON
             query_data = json.loads(json_text)
             
             return query_data
             
         except Exception as e:
-            logger.error(f"Error al generar consulta MongoDB: {str(e)}")
+            logger.error(f"Error generating MongoDB query: {str(e)}")
             
             
         
